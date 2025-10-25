@@ -9,7 +9,7 @@
 
 #pragma pack(push, 1)
 
-
+#include "Matrix.h"
 #include "Vector.h"
 #include "Plane.h"
 
@@ -44,6 +44,7 @@ public:
 	///Пустой конструктор
 	Triangle();
 	Triangle(const Vector * v);
+	Triangle(const Triangle& rhs) : p1(rhs.p1), p2(rhs.p2), p3(rhs.p3){}
 
 //-----------------------------------------------------------
 //Операторы
@@ -270,7 +271,7 @@ mathinline bool Triangle::FindClosestPoint(const Vector & trgNormal, Vector & po
 	return true;
 }
 
-//Преобразовать координаты вершин
+// Convert vertex coordinates
 mathinline Triangle & Triangle::Transform(const Matrix & mtx)
 {
 	p1 = mtx.MulVertex(p1);
@@ -279,30 +280,30 @@ mathinline Triangle & Triangle::Transform(const Matrix & mtx)
 	return *this;
 }
 
-//Проверка треугольников на пересечение в одной плоскости
+// Checking triangles for intersections in one plane
 mathinline Triangle::CoIntersectionResult Triangle::IsCoplanarIntersection(const Triangle & t, float intsEps) const
 {
-	//Проверим размеры треугольников
+	// Checking the dimensions of the triangles
 	if(~(p1 - p2) < intsEps*intsEps || ~(p2 - p3) < intsEps*intsEps || ~(p3 - p1) < intsEps*intsEps) return cir_deg_cur;
 	if(~(t.p1 - t.p2) < intsEps*intsEps || ~(t.p2 - t.p3) < intsEps*intsEps || ~(t.p3 - t.p1) < intsEps*intsEps) return cir_deg_t;
-	//Получим нормали
+	// get the normals
 	Vector n = (p1 - p2) ^ (p1 - p3);
 	if(n.Normalize() < 0.0000001f) return cir_deg_cur;
 	Vector nt = (t.p1 - t.p2) ^ (t.p1 - t.p3);
 	if(nt.Normalize() < 0.0000001f) return cir_deg_t;
-	//Проверим копланарность
+	// Checking coplanarity
 	float cs = n | nt;
 	static const float cosMin = cosf(0.5f*3.141592654f/180.0f);
 	if(cs < cosMin) return cir_none;
-	//Дистанция плоскостей
+	// Distance between planes
 	float d = n | p1;
 	float dt = n | t.p1;
 	if(fabs(d - dt) > intsEps) return cir_none;
-	//Проверим на совпадение
+	// Check for a match
 	if(~(p1 - t.p1) + ~(p2 - t.p2) + ~(p3 - t.p3) < intsEps*intsEps) return cir_equal;
 	if(~(p2 - t.p1) + ~(p3 - t.p2) + ~(p1 - t.p3) < intsEps*intsEps) return cir_equal;
 	if(~(p3 - t.p1) + ~(p1 - t.p2) + ~(p2 - t.p3) < intsEps*intsEps) return cir_equal;
-	//Проверим на пересечение клипированием
+	// Check for intersection by clipping
 	static Vector poly1[8], poly2[8];
 	poly1[0] = t.p1; poly1[1] = t.p2; poly1[2] = t.p3;
 	long count = 3;
@@ -324,17 +325,18 @@ mathinline Triangle::CoIntersectionResult Triangle::IsCoplanarIntersection(const
 mathinline long Triangle::z_sysClipTriangleEdgePlane(Plane plane, Vector src[8], Vector dst[8], long count)
 {
 	float ds = plane*src[0], de;
+	long c = 0;
 	for(long s = 0, c = 0; s < count; s++, ds = de)
 	{
-		//Если в области, добавляем вершину
+		// If in the area, add a vertex
 		if(ds <= 0.0f) dst[c++] = src[s];		
-		//Индекс следующего
+		// Index of next
 		long e = s + 1 < count ? s + 1 : 0;
-		//Дистанции до плоскости
+		// Distance to plane
 		de = plane*src[e];
-		//Если с одной стороны, то продолжаем
+		// If on the one side, then continue
 		if(ds*de >= 0.0f) continue;
-		//Есть пересечение
+		// There is an intersection
 		dst[c++] = src[s] + (src[e] - src[s])*(ds/(ds - de));
 	}
 	if(c < 3) c = 0;

@@ -121,7 +121,7 @@ class ISteamUtils;
 class CSteamStatsAchievements
 {
 private:
-	int64 			m_iAppID; 						// Our current AppID
+	int32 			m_iAppID; 						// Our current AppID
 	Achievement_t  *m_pAchievements; 				// Achievements data
 	long 			m_iNumAchievements; 			// The number of Achievements
 	bool 			m_bInitialized; 				// Have we called Request stats and received the callback?

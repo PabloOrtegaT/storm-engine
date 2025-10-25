@@ -22,7 +22,7 @@ TSharks::~TSharks()
 			delete sharks[i];
 	}
 
-	for (i=0; i<shipsCount; i++)
+	for (int i=0; i<shipsCount; i++)
 	{
 		if (ships[i])
 			delete ships[i];
@@ -76,13 +76,13 @@ void TSharks::Init()
 	{
 		ships[shipsCount] = NEW TShip();
 		ships[shipsCount]->ship = (SHIP_BASE*) _CORE_API->GetEntityPointer(&shipID);
-		TDynamicSystem::AddDeflector(ships[i]);
-		++shipsCount;
+		//TDynamicSystem::AddDeflector(ships[0]);
 		while (_CORE_API->FindClassNext(&shipID))
 		{
+			++shipsCount;
 			ships[shipsCount] = NEW TShip();
 			ships[shipsCount]->ship = (SHIP_BASE*) _CORE_API->GetEntityPointer(&shipID);
-			//TDynamicSystem::AddDeflector(ships[i]);
+			TDynamicSystem::AddDeflector(ships[shipsCount]);
 			++shipsCount;
 			if (++shipsCount == SHARK_MAX_SHIPS)
 				break;
@@ -135,7 +135,7 @@ void TSharks::Execute(dword _dTime)
 		ships[i]->SetXYZ(ships[i]->ship->GetPos());
 
 	float speedK = ((float) _dTime) / 200.0f;
-	for (i = 0; i<sharksCount; i++)
+	for (int i = 0; i<sharksCount; i++)
 	{
 		sharks[i]->Calculate(attractors, MAX_DYNAMIC_OBJECTS,deflectors, MAX_DYNAMIC_OBJECTS, speedK);
 		sharks[i]->time += _dTime;

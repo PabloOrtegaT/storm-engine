@@ -4,7 +4,7 @@
 
 //#include <windows.h> 
 #include "..\common_h\vmodule_api.h"
-#include <D3DX8.h>
+#include "..\common_h\D3DX8.h"
 
 //#include "..\common_h\vmodule_api.h"
 #include "..\common_h\types3d.h"
